@@ -1,9 +1,11 @@
 package com.jozzz.util;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.jozzz.gui.component.CowsTable;
@@ -12,9 +14,11 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class WriteXlsxFile {
 
@@ -129,6 +133,82 @@ public class WriteXlsxFile {
         }).start();
     }
 
+    public static ArrayList<String[]> readExcelData(ArrayList<String[]> mapedRows,
+    ArrayList<String[]> mapedProjects,JTextArea mapTextArea , HashSet<String> keyMapSet) {
+        setFileChooserUI();
+        JFileChooser fileChooser = new JFileChooser();
+        setFileChooserFont(fileChooser, Element.getFont(15));
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("EXCEL FILES", "xlsx");
+        fileChooser.setFileFilter(filter);
+        fileChooser.setCurrentDirectory(new File("."));
+        
+        int returnValue = fileChooser.showOpenDialog(null);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                ArrayList<String[]> excelData = readExcelData(selectedFile);
+                mapedProjects = new ArrayList<String[]>(excelData);
+                for (String[] row : excelData) {
+                    if(row[0].equals("Key")){
+                        continue;
+                    }
+                    keyMapSet.add(row[0]);
+                }
+                System.out.println(keyMapSet);
+                String[] keyMapString = keyMapSet.toArray(new String[keyMapSet.size()]);
+                for (int i = 0; i < keyMapString.length; i++) {
+                    mapTextArea.append(keyMapString[i] + "\n");
+                }
+
+                return mapedProjects;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No file selected.");
+        }
+        return new ArrayList<>();
+    }
+
+    private static ArrayList<String[]> readExcelData(File excelFile) throws IOException {
+        ArrayList<String[]> excelData = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(excelFile);
+             Workbook workbook = WorkbookFactory.create(fis)) {
+            Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
+            for (Row row : sheet) {
+                ArrayList<String> rowData = new ArrayList<>();
+                for (Cell cell : row) {
+                    String cellValue = getCellValueAsString(cell);
+                    rowData.add(cellValue);
+                }
+                excelData.add(rowData.toArray(new String[0]));
+            }
+        }
+        // Your Excel reading logic here
+        return excelData;
+    }
+    private static String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString(); // You may format the date as per your requirement
+                } else {
+                    return String.valueOf(cell.getNumericCellValue());
+                }
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return "";
+        }
+    }
     private static void setFileChooserUI() {
         UIManager.put("FileChooser.openDialogTitleText", "เปิดไฟล์");
         UIManager.put("FileChooser.saveDialogTitleText", "บันทึกไฟล์");
@@ -154,7 +234,9 @@ public class WriteXlsxFile {
     public static void exportToExcel(ArrayList<String[]> mapedRows,
             ArrayList<String[]> mapedProjects) {
         
+        setFileChooserUI();
         JFileChooser fileChooser = new JFileChooser();
+        setFileChooserFont(fileChooser, Element.getFont(15));
         fileChooser.setDialogTitle("Save as");
         int userSelection = fileChooser.showSaveDialog(null);
         String[] excelHeader = new String[2];
@@ -162,7 +244,6 @@ public class WriteXlsxFile {
         excelHeader[1] = "String";
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             String excelFilePath = fileChooser.getSelectedFile().getPath() + ".xlsx";
-            String excelProjectPath = "BreedMap.xlsx";
             deleteExcelFile();
             try (Workbook workbook = new XSSFWorkbook()) {
                 Sheet sheet = workbook.createSheet("Data");
@@ -192,25 +273,7 @@ public class WriteXlsxFile {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try (Workbook workbook = new XSSFWorkbook()) {
-                Sheet sheetProject = workbook.createSheet("Data");
-                
-                // เขียนข้อมูลจาก deletedRows ลงใน Excel
-                int rowCountProject = 1;
-                for (String[] rowData : mapedProjects) {
-                    Row row = sheetProject.createRow(rowCountProject++);
-                    for (int j = 0; j < rowData.length; j++) {
-                        Cell cell = row.createCell(j);
-                        cell.setCellValue(rowData[j]);
-                    }
-                }
-                System.out.println("Excel written successfully.");
-                try (FileOutputStream outputStream = new FileOutputStream(excelProjectPath)) {
-                    workbook.write(outputStream);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            
         }
     }
 
@@ -227,6 +290,20 @@ public class WriteXlsxFile {
             }
         } else {
             System.out.println("Excel file not found.");
+        }
+    }
+    public static void printArrayList(ArrayList<String[]> arrayList) {
+        int count = 0;
+        for (String[] array : arrayList) {
+            System.out.print("[ ");
+            for (String element : array) {
+                System.out.print(element + ", ");
+            }
+            System.out.println("]");
+            if (count == 20) {
+                break;
+            }
+            count++;
         }
     }
 }

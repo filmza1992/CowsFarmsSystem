@@ -59,7 +59,6 @@ public class DairyNewFormatDisplay extends JPanel {
             }
         }).start();
         dialog.getDialog().setVisible(true);
-        
     }
 
     private void init(){
