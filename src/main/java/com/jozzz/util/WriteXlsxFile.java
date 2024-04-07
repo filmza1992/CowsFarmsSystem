@@ -141,7 +141,7 @@ public class WriteXlsxFile {
 
         FileNameExtensionFilter filter = new FileNameExtensionFilter("EXCEL FILES", "xlsx");
         fileChooser.setFileFilter(filter);
-        fileChooser.setCurrentDirectory(new File("."));
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {

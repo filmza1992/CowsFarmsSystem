@@ -91,8 +91,6 @@ public class DataDB {
 
             if (entity != null) {
                 String result = EntityUtils.toString(entity);
-                System.out.println(result);
-
                 Gson gson = new Gson();
                 Type listType = new TypeToken<List<String>>() {
                 }.getType();

@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.jozzz.Main;
 import com.jozzz.util.RunDB;
 
 public class RegexPattern {
@@ -102,11 +103,12 @@ public class RegexPattern {
         List<String[]> regexList = new ArrayList<>();
 
         Properties properties = new Properties();
-
+        Main.class.getClassLoader().getResourceAsStream("regex.properties");
+        
         try {
-            FileInputStream fis = new FileInputStream("regex.properties");
-            properties.load(fis);
-            fis.close();
+           
+            properties.load(Main.class.getClassLoader().getResourceAsStream("regex.properties"));
+            
         } catch (IOException e) {
             e.printStackTrace();
         }

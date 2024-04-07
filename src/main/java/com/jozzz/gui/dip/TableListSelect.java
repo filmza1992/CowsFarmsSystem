@@ -74,30 +74,11 @@ public class TableListSelect extends JPanel {
         ArrayList<String[]> tempDairyBreed = new ArrayList<>(allDairyBreedPattern);
 
         ArrayList<String[]> filter = RegexPattern.filterData(tempDairyBreed, regex.get(15)[1], 0);
-        ArrayList<String[]> dataExcel = findNameInExcel();
+        
 
         HashSet<String> keyMaped = new HashSet<>();
 
-        if (!dataExcel.isEmpty()) {
-            for (int i = 0; i < filter.size(); i++) {
-                String[] filterData = filter.get(i);
-                for (String[] dataExcelRow : dataExcel) {
-                    if (filterData[0].equals(dataExcelRow[1])) {
-                        filter.remove(i);
-                        i--; // ลดค่าตัวแปร i เพื่อปรับปรุงตำแหน่งใหม่หลังจากการลบ
-                        break; // ออกจากลูปภายในเมื่อพบสมาชิกที่ต้องการลบแล้ว
-                    }
-
-                }
-            }
-            for (String[] dataExcelRow : dataExcel) {
-                if (dataExcelRow[0].equals("Key")) {
-                    continue;
-                }
-                keyMaped.add(dataExcelRow[0]);
-            }
-            mapedProject = dataExcel;
-        }
+       
 
         CowsTable table1 = new CowsTable(filter, columnList, false);
         CowsTable table2 = new CowsTable(new ArrayList<>(), columnSelectedList, false);
