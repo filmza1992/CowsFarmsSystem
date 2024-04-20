@@ -94,12 +94,14 @@ public class TableListSelect extends JPanel {
         moveToTable2Button.setFont(Element.getFont(15));
         JButton moveToTable1Button = new JButton("<< ย้ายไป List");
         moveToTable1Button.setFont(Element.getFont(15));
-
+        JButton checkBreedButton = new JButton("ตรวจการซ้ำกันใน Excel");
+        checkBreedButton.setFont(Element.getFont(15));
+        
         moveToTable2Button.addActionListener(
                 event -> moveSelectedRows(table1.getTable(), table1.getTableModel(), table2.getTableModel()));
         moveToTable1Button.addActionListener(
                 event -> moveSelectedRows(table2.getTable(), table2.getTableModel(), table1.getTableModel()));
-
+        checkBreedButton.addActionListener(event -> checkWord());
         JPanel tablePanel = new JPanel(new GridLayout(1, 2));
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
@@ -113,6 +115,7 @@ public class TableListSelect extends JPanel {
 
         moveToTable1Button.setBounds(100, 250, 315, 50);
         moveToTable2Button.setBounds(100, 100, 315, 50);
+        checkBreedButton.setBounds(100, 550, 315, 50);
 
         JTextArea mapTextArea = new JTextArea();
         JLabel mapLabel = new JLabel("ประวัติ Key");
@@ -128,7 +131,7 @@ public class TableListSelect extends JPanel {
         movePanel.add(moveToTable2Button);
         movePanel.add(mapLabel);
         movePanel.add(scrollPane);
-
+        movePanel.add(checkBreedButton);
         tablePanel.add(table2);
 
         JPanel menuBarPanel = new JPanel();
@@ -315,9 +318,7 @@ public class TableListSelect extends JPanel {
         for (int i = 0; i < mapedProject.size(); i++) {
             String[] row = mapedProject.get(i);
             for (int j = 0; j < tableModel1.getRowCount(); j++) {
-
                 if (row[1].equals(tableModel1.getValueAt(j, 0))) {
-                    System.out.println(row[1] + "===" + tableModel1.getValueAt(j, 0));
                     tableModel1.removeRow(j);
                     break; // Assuming each row in the JTable has unique identifiers
                 }
@@ -372,6 +373,32 @@ public class TableListSelect extends JPanel {
         // }
     }
 
+    public void checkWord(){
+        int count = 0;
+        int countRow = 0;
+        System.out.println("====");
+        System.out.println("Check Word");
+        System.out.println("====");
+        System.out.println("Map in project");
+        for(String[] source : mapedProject){
+            if(source[0].equals("Key")){
+                continue;
+            }
+            countRow = 0;
+            for(String[] target : mapedProject){
+                countRow++;
+                if(target[1].equals(source[1]) && target[0].equals(source[0])){
+                    continue;
+                }else if(target[1].equals(source[1]) && !target[0].equals(source[0])){
+                    System.out.println("Found breed_code same word!!!");
+                    System.out.println(source[0] + " " + source[1] + "===" + target[0] + " " + target[1]+" at row " + countRow);
+                    count++;
+                }
+            }
+            
+        }
+        System.out.println("Have error same count : "+count);
+    }
     public boolean isPageLoading() {
         return isPageLoading;
     }
